@@ -1,5 +1,6 @@
 package br.univille.dsi2017android;
 
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
     private ServerInterface servidor;
     private ListView listClientes;
     private ArrayAdapter<Cliente> listClienteAdapter;
+    private SwipeRefreshLayout mySwipeRefreshLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,6 +37,9 @@ public class MainActivity extends AppCompatActivity {
         listClienteAdapter = new ArrayAdapter<Cliente>(this, android.R.layout.simple_list_item_1,new ArrayList<Cliente>());
         listClientes = (ListView) findViewById(R.id.listClientes);
         listClientes.setAdapter(listClienteAdapter);
+
+        mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+
 
         Gson gson = new GsonBuilder()
                 .setPrettyPrinting()
@@ -46,6 +52,22 @@ public class MainActivity extends AppCompatActivity {
 
         servidor = retrofit.create(ServerInterface.class);
 
+        updateList();
+
+        mySwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        mySwipeRefreshLayout.setRefreshing(true);
+                        updateList();
+                        mySwipeRefreshLayout.setRefreshing(false);
+
+                    }
+                }
+        );
+
+    }
+    public void updateList(){
         Call<List<Cliente>> retorno = servidor.getAllClientes();
 
         Log.i("DSI2017","Chamando servidor");
@@ -67,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this,"Não deu...",Toast.LENGTH_LONG);
             }
         });
-
     }
+
+
+
 }
