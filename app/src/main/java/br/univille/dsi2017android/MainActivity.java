@@ -1,9 +1,11 @@
 package br.univille.dsi2017android;
 
+import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.univille.dsi2017android.model.Cliente;
+import br.univille.dsi2017android.server.ServerConnection;
 import br.univille.dsi2017android.server.ServerInterface;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -41,16 +44,7 @@ public class MainActivity extends AppCompatActivity {
         mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
 
 
-        Gson gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .create();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.185.41:8080/dsi2017web/api/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        servidor = retrofit.create(ServerInterface.class);
+        servidor = ServerConnection.getInstance().getServidor();
 
         updateList();
 
@@ -92,5 +86,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    public void onClickInserir(View view) {
+        Intent i = new Intent(this,FrmCliente.class);
+        i.putExtra("model",new Cliente());
+        startActivityForResult(i,1);
+    }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == 1){
+            Cliente model = (Cliente)data.getExtras().getSerializable("model");
+            Call<String> retorno = servidor.insertClientes(model);
+            retorno.enqueue(new Callback<String>() {
+
+                @Override
+                public void onResponse(Call<String> call, Response<String> response) {
+                    Toast.makeText(MainActivity.this,"Inserido com sucesso",Toast.LENGTH_SHORT);
+                    updateList();
+                }
+
+                @Override
+                public void onFailure(Call<String> call, Throwable t) {
+                    Toast.makeText(MainActivity.this,"Bugou...",Toast.LENGTH_SHORT);
+                }
+            });
+        }
+    }
 }

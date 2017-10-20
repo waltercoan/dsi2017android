@@ -1,10 +1,12 @@
 package br.univille.dsi2017android.model;
 
+import java.io.Serializable;
+
 /**
  * Created by walte on 18/10/2017.
  */
 
-public class Cliente {
+public class Cliente implements Serializable{
     private long id;
     private String nome;
     private int sexo;
@@ -30,6 +32,6 @@ public class Cliente {
     }
 
     public String toString(){
-        return String.format("%s (%s)",this.nome,((this.sexo == 1?"Masculino":"Femino")));
+        return String.format("%s (%s)",this.nome,((this.sexo == 1?"Masculino":"Feminino")));
     }
 }
